@@ -44,14 +44,21 @@ jobs:
           /p:WindowsTargetPlatformVersion=10.0
           /p:PreferredToolArchitecture=x64
 
-      # Collect outputs. Projects sometimes emit to build\<Platform>\<Configuration>\,
-      # but also to the default VS folders (e.g. UberWolf\x64\Release\). We grab both.
-      - name: Upload artifacts
+      - name: Show output dir
+        shell: cmd
+        run: dir /s SRPG_Unpacker\${{ matrix.platform }}\${{ matrix.configuration }}
+
+      - name: Upload artifacts (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: SRPG_Unpacker-${{ matrix.platform }}-${{ matrix.configuration }}
           if-no-files-found: warn
           path: |
+            # Exact exe + symbols
+            SRPG_Unpacker\${{ matrix.platform }}\${{ matrix.configuration }}\SRPG_Unpacker.exe
+            SRPG_Unpacker\${{ matrix.platform }}\${{ matrix.configuration }}\*.pdb
+            # Anything else from that output dir (dlls, logs, etc.)
+            SRPG_Unpacker\${{ matrix.platform }}\${{ matrix.configuration }}\**
+            # Keep the generic build tree if you use it
             build\${{ matrix.platform }}\${{ matrix.configuration }}\**
-            SRPG_Unpacker\SRPG_Unpacker\${{ matrix.platform }}\${{ matrix.configuration }}\**
